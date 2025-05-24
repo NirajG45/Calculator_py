@@ -19,7 +19,7 @@ A sleek, responsive, and real-world style calculator built using **Flask** (Pyth
 
 | Mobile View | Desktop View |
 |-------------|--------------|
-| ![Mobile Screenshot](screenshots/mobile_view.jpg) | ![Desktop Screenshot](screenshots/desktop_view.jpg) |
+| ![Mobile Screenshot](screenshots/mobile_view.png) | ![Desktop Screenshot](screenshots/desktop_view.png) |
 
 > _Make sure to add the images in `screenshots/` folder before pushing._
 
