@@ -89,6 +89,12 @@
 </head>
 <body>
   <div class="calculator">
+    <div class="history-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <strong>History</strong>
+      <button onclick="clearHistory()" style="background: none; border: none; color: red; font-weight: bold; cursor: pointer;">
+        🗑️
+      </button>
+    </div>
     <div class="history" id="history"></div>
     <div class="display" id="display">0</div>
     <div class="buttons">
@@ -146,6 +152,11 @@
       } catch {
         display.innerText = "Error";
       }
+    }
+
+    function clearHistory() {
+      calcHistory = [];
+      history.innerText = "";
     }
   </script>
 </body>
