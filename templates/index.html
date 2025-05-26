@@ -1,112 +1,147 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculator</title>
-    <style>
-        body {
-            background-color: black;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            text-align: center;
-            padding: 20px;
-        }
-        .calculator {
-            max-width: 400px;
-            margin: auto;
-        }
-        .display {
-            font-size: 2rem;
-            background: #222;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 10px;
-        }
-        .buttons button {
-            width: 22%;
-            padding: 20px;
-            margin: 1%;
-            font-size: 1.2rem;
-            border: none;
-            border-radius: 10px;
-            background-color: #333;
-            color: white;
-        }
-        .buttons button.orange {
-            background-color: orange;
-        }
-        .history {
-            text-align: left;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Responsive Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #1e1e1e;
+      font-family: 'Orbitron', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .calculator-container {
+      background-color: #2b2b2b;
+      border-radius: 20px;
+      padding: 1rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.6);
+    }
+
+    .display {
+      color: white;
+      font-size: 2rem;
+      text-align: right;
+      padding: 1rem;
+      background-color: #111;
+      border-radius: 10px;
+      margin-bottom: 1rem;
+    }
+
+    .history {
+      color: #6cff6c;
+      font-size: 1rem;
+      text-align: right;
+      padding: 0.5rem 1rem;
+      white-space: pre-wrap;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.8rem;
+    }
+
+    .btn {
+      background-color: #333;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      padding: 1.2rem;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn:active {
+      background-color: #444;
+    }
+
+    .btn.orange {
+      background-color: #ff8c1a;
+      color: black;
+    }
+
+    @media (min-width: 768px) {
+      .calculator-container {
+        max-width: 500px;
+      }
+      .display {
+        font-size: 2.5rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="calculator">
-        <h1>Calculator</h1>
-        <div class="display" id="display">{{ expression or '0' }}</div>
-        <form id="calc-form" method="POST">
-            <input type="hidden" name="expression" id="expression">
-        </form>
-        <div class="buttons">
-            <button onclick="clearDisplay()">AC</button>
-            <button onclick="backspace()">⌫</button>
-            <button onclick="append('%')">%</button>
-            <button onclick="append('/')">÷</button>
-            <button onclick="append('7')">7</button>
-            <button onclick="append('8')">8</button>
-            <button onclick="append('9')">9</button>
-            <button onclick="append('*')">×</button>
-            <button onclick="append('4')">4</button>
-            <button onclick="append('5')">5</button>
-            <button onclick="append('6')">6</button>
-            <button onclick="append('-')">−</button>
-            <button onclick="append('1')">1</button>
-            <button onclick="append('2')">2</button>
-            <button onclick="append('3')">3</button>
-            <button onclick="append('+')">+</button>
-            <button onclick="append('0')">0</button>
-            <button onclick="append('.')">.</button>
-            <button onclick="calculate()" class="orange">=</button>
-        </div>
-        {% if result %}
-        <div class="result">Result: {{ result }}</div>
-        {% endif %}
-        {% if error %}
-        <div style="color: red;">{{ error }}</div>
-        {% endif %}
-        <div class="history">
-            <h3>History</h3>
-            <ul>
-                {% for item in history %}
-                    <li>{{ item }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+  <div class="calculator-container">
+    <div class="history" id="historyDisplay">754+60 = 814\n814-60-40-12-20-15-20-5-10-5 = 627\n814 - 627 = 187</div>
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+      <button class="btn orange" onclick="clearDisplay()">AC</button>
+      <button class="btn" onclick="deleteChar()">DEL</button>
+      <button class="btn" onclick="append('%')">%</button>
+      <button class="btn" onclick="append('/')">/</button>
+
+      <button class="btn" onclick="append('7')">7</button>
+      <button class="btn" onclick="append('8')">8</button>
+      <button class="btn" onclick="append('9')">9</button>
+      <button class="btn" onclick="append('')"></button>
+
+      <button class="btn" onclick="append('4')">4</button>
+      <button class="btn" onclick="append('5')">5</button>
+      <button class="btn" onclick="append('6')">6</button>
+      <button class="btn" onclick="append('-')">-</button>
+
+      <button class="btn" onclick="append('1')">1</button>
+      <button class="btn" onclick="append('2')">2</button>
+      <button class="btn" onclick="append('3')">3</button>
+      <button class="btn" onclick="append('+')">+</button>
+
+      <button class="btn" onclick="append('0')">0</button>
+      <button class="btn" onclick="append('.')">.</button>
+      <button class="btn orange" style="grid-column: span 2" onclick="calculate()">=</button>
     </div>
-    <script>
-        function append(char) {
-            const display = document.getElementById('display');
-            if (display.textContent === '0') {
-                display.textContent = char;
-            } else {
-                display.textContent += char;
-            }
-        }
-        function clearDisplay() {
-            document.getElementById('display').textContent = '0';
-        }
-        function backspace() {
-            const display = document.getElementById('display');
-            display.textContent = display.textContent.slice(0, -1) || '0';
-        }
-        function calculate() {
-            const expr = document.getElementById('display').textContent;
-            document.getElementById('expression').value = expr;
-            document.getElementById('calc-form').submit();
-        }
-    </script>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const historyDisplay = document.getElementById('historyDisplay');
+
+    function append(char) {
+      if (display.textContent === '0') {
+        display.textContent = char;
+      } else {
+        display.textContent += char;
+      }
+    }
+
+    function clearDisplay() {
+      display.textContent = '0';
+    }
+
+    function deleteChar() {
+      display.textContent = display.textContent.slice(0, -1) || '0';
+    }
+
+    function calculate() {
+      try {
+        const expression = display.textContent;
+        const result = eval(expression);
+        historyDisplay.textContent += \n${expression} = ${result};
+        display.textContent = result;
+      } catch (error) {
+        display.textContent = 'Error';
+      }
+    }
+  </script>
 </body>
 </html>
