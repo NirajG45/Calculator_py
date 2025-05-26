@@ -43,5 +43,10 @@ def calculator():
                 error = "Invalid mathematical expression or function."
     return render_template('index.html', result=result, expression=expression, error=error, history=session.get('history', []))
 
+@app.route('/clear-history', methods=['POST'])
+def clear_history():
+    session['history'] = []
+    return render_template('index.html', result=None, expression="", error=None, history=[])
+
 if __name__ == '__main__':
     app.run(debug=True)
