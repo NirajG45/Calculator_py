@@ -88,78 +88,64 @@
   </style>
 </head>
 <body>
-  <body>
   <div class="calculator">
-
-    <!-- Top bar -->
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-      <div style="font-size: 1.2rem; font-weight: bold;">🧮 Calculator</div>
-      <form method="POST" action="/clear-history">
-        <button type="submit" style="
-          background: none;
-          border: none;
-          color: #aaa;
-          font-size: 1.2rem;
-          cursor: pointer;
-        " title="Clear History">🗑️</button>
-      </form>
+    <div class="history" id="history"></div>
+    <div class="display" id="display">0</div>
+    <div class="buttons">
+      <button class="btn-orange" onclick="clearDisplay()">AC</button>
+      <button onclick="deleteLast()">DEL</button>
+      <button onclick="append('%')">%</button>
+      <button onclick="append('/')">÷</button>
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('*')">×</button>
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('-')">−</button>
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="append('+')">+</button>
+      <button onclick="append('0')">0</button>
+      <button onclick="append('.')">.</button>
+      <button class="btn-orange" style="grid-column: span 2;" onclick="calculate()">=</button>
     </div>
-
-    <!-- Main form -->
-    <form method="POST">
-      <div class="history">{{ "\n".join(history[-3:]) if history else "" }}</div>
-      <input type="hidden" id="expression" name="expression" value="{{ expression }}">
-      <div class="display" id="display">{{ result or expression or '0' }}</div>
-      {% if error %}
-        <div style="color: red; font-size: 0.9rem;">{{ error }}</div>
-      {% endif %}
-
-      <!-- Buttons (your sequence) -->
-      <div class="buttons">
-        <button class="btn-orange" type="button" onclick="clearDisplay()">AC</button>
-        <button type="button" onclick="deleteLast()">DEL</button>
-        <button type="button" onclick="append('%')">%</button>
-        <button type="button" onclick="append('/')">÷</button>
-
-        <button type="button" onclick="append('7')">7</button>
-        <button type="button" onclick="append('8')">8</button>
-        <button type="button" onclick="append('9')">9</button>
-        <button type="button" onclick="append('*')">×</button>
-
-        <button type="button" onclick="append('4')">4</button>
-        <button type="button" onclick="append('5')">5</button>
-        <button type="button" onclick="append('6')">6</button>
-        <button type="button" onclick="append('-')">−</button>
-
-        <button type="button" onclick="append('1')">1</button>
-        <button type="button" onclick="append('2')">2</button>
-        <button type="button" onclick="append('3')">3</button>
-        <button type="button" onclick="append('+')">+</button>
-
-        <button type="button" onclick="append('0')">0</button>
-        <button type="button" onclick="append('.')">.</button>
-        <button class="btn-orange" type="submit" style="grid-column: span 2;">=</button>
-      </div>
-    </form>
   </div>
 
   <script>
-    const display = document.getElementById('display');
-    const expressionInput = document.getElementById('expression');
+    const display = document.getElementById("display");
+    const history = document.getElementById("history");
+    let currentInput = "";
+    let calcHistory = [];
 
-    function append(value) {
-      expressionInput.value += value;
-      display.innerText = expressionInput.value;
+    function append(char) {
+      if (display.innerText === "0") display.innerText = "";
+      currentInput += char;
+      display.innerText = currentInput;
     }
 
     function clearDisplay() {
-      expressionInput.value = '';
-      display.innerText = '0';
+      currentInput = "";
+      display.innerText = "0";
     }
 
     function deleteLast() {
-      expressionInput.value = expressionInput.value.slice(0, -1);
-      display.innerText = expressionInput.value || '0';
+      currentInput = currentInput.slice(0, -1);
+      display.innerText = currentInput || "0";
+    }
+
+    function calculate() {
+      try {
+        const result = eval(currentInput);
+        calcHistory.push(`${currentInput} = ${result}`);
+        history.innerText = calcHistory.slice(-3).join("\n");
+        display.innerText = result;
+        currentInput = result.toString();
+      } catch {
+        display.innerText = "Error";
+      }
     }
   </script>
 </body>
