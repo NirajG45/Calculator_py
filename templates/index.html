@@ -2,13 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Responsive Calculator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Advanced Calculator</title>
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
@@ -19,7 +16,6 @@
       align-items: center;
       height: 100vh;
     }
-
     .calculator {
       background-color: #1f1f1f;
       padding: 1rem;
@@ -28,14 +24,30 @@
       max-width: 400px;
       box-shadow: 0 0 20px #000;
     }
-
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
     .history {
       font-size: 0.9rem;
       color: #aaa;
       min-height: 2rem;
       margin-bottom: 0.5rem;
+      max-height: 4rem;
+      overflow-y: auto;
     }
-
+    .full-history {
+      background-color: #2b2b2b;
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      border-radius: 0.5rem;
+      max-height: 150px;
+      overflow-y: auto;
+      display: none;
+      margin-bottom: 1rem;
+    }
     .display {
       font-size: 2rem;
       font-weight: bold;
@@ -45,13 +57,11 @@
       border-radius: 0.5rem;
       margin-bottom: 1rem;
     }
-
     .buttons {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 0.5rem;
     }
-
     button {
       font-size: 1.5rem;
       padding: 1rem;
@@ -62,40 +72,29 @@
       cursor: pointer;
       transition: background-color 0.3s ease;
     }
-
-    button:active {
-      background-color: #444;
-    }
-
+    button:active { background-color: #444; }
     .btn-orange {
       background-color: orange;
       color: #000;
     }
-
     @media (min-width: 768px) {
-      .calculator {
-        max-width: 500px;
-      }
-
-      .display {
-        font-size: 2.5rem;
-      }
-
-      button {
-        font-size: 1.6rem;
-      }
+      .calculator { max-width: 500px; }
+      .display { font-size: 2.5rem; }
+      button { font-size: 1.6rem; }
     }
   </style>
 </head>
 <body>
   <div class="calculator">
-    <div class="history-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <div class="history-header" onclick="toggleFullHistory()">
       <strong>History</strong>
-      <button onclick="clearHistory()" style="background: none; border: none; color: red; font-weight: bold; cursor: pointer;">
+      <!-- 🔁 Updated: Clear button now has ID and is hidden by default -->
+      <button id="clearBtn" onclick="clearHistory(); event.stopPropagation();" style="background: none; border: none; color: red; font-weight: bold; cursor: pointer; display: none;">
         🗑️
       </button>
     </div>
     <div class="history" id="history"></div>
+    <div class="full-history" id="fullHistory"></div>
     <div class="display" id="display">0</div>
     <div class="buttons">
       <button class="btn-orange" onclick="clearDisplay()">AC</button>
@@ -123,12 +122,37 @@
   <script>
     const display = document.getElementById("display");
     const history = document.getElementById("history");
+    const fullHistory = document.getElementById("fullHistory");
+    const clearBtn = document.getElementById("clearBtn");
+
     let currentInput = "";
-    let calcHistory = [];
+    let calcHistory = JSON.parse(localStorage.getItem("calcHistory")) || [];
+    let isResultDisplayed = false;
+
+    updateShortHistory();
+    updateFullHistory();
 
     function append(char) {
-      if (display.innerText === "0") display.innerText = "";
-      currentInput += char;
+      const operators = ["+", "-", "*", "/", "%"];
+
+      if (isResultDisplayed) {
+        if (operators.includes(char)) {
+          currentInput = display.innerText + char;
+        } else {
+          currentInput = char;
+        }
+        isResultDisplayed = false;
+      } else {
+        if (
+          currentInput.length > 0 &&
+          operators.includes(currentInput.slice(-1)) &&
+          operators.includes(char)
+        ) {
+          currentInput = currentInput.slice(0, -1) + char;
+        } else {
+          currentInput += char;
+        }
+      }
       display.innerText = currentInput;
     }
 
@@ -145,10 +169,15 @@
     function calculate() {
       try {
         const result = eval(currentInput);
-        calcHistory.push(`${currentInput} = ${result}`);
-        history.innerText = calcHistory.slice(-3).join("\n");
+        const timeStamp = new Date().toISOString();
+        const record = `${currentInput} = ${result} (${timeStamp})`;
+        calcHistory.push(record);
+        localStorage.setItem("calcHistory", JSON.stringify(calcHistory));
+        updateShortHistory();
+        updateFullHistory();
         display.innerText = result;
         currentInput = result.toString();
+        isResultDisplayed = true;
       } catch {
         display.innerText = "Error";
       }
@@ -156,7 +185,52 @@
 
     function clearHistory() {
       calcHistory = [];
-      history.innerText = "";
+      localStorage.removeItem("calcHistory");
+      updateShortHistory();
+      updateFullHistory();
+    }
+
+    function updateShortHistory() {
+      history.innerText = calcHistory
+        .slice(-3)
+        .map(entry => entry.split(" (")[0])
+        .join("\n");
+    }
+
+    function updateFullHistory() {
+      fullHistory.innerHTML = calcHistory
+        .slice()
+        .reverse()
+        .map(entry => {
+          const parts = entry.match(/(.+?) = (.+?) \((.+?)\)/);
+          if (parts) {
+            const expr = parts[1];
+            const result = parts[2];
+            const timestamp = new Date(parts[3]);
+            const date = timestamp.toLocaleDateString();
+            const time = timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            return `
+              <div style="margin-bottom: 0.75rem;">
+                <strong>${expr} = ${result}</strong><br/>
+                <span style="color: #888;">📅 ${date} 🕒 ${time}</span>
+              </div>
+            `;
+          } else {
+            return `<div>${entry}</div>`;
+          }
+        })
+        .join("");
+    }
+
+    function toggleFullHistory() {
+      if (fullHistory.style.display === "none" || fullHistory.style.display === "") {
+        fullHistory.style.display = "block";
+        clearBtn.style.display = "inline";  // 👈 Show clear button
+      } else {
+        fullHistory.style.display = "none";
+        clearBtn.style.display = "none";    // 👈 Hide clear button
+      }
     }
   </script>
 </body>
